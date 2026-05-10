@@ -40,7 +40,84 @@ Ao fim do percurso, cada grupo deve entregar:
 3. Integracao entre frontend e backend.
 4. Documento curto explicando os padroes aplicados.
 
-## 5. Cronograma Sugerido (6 encontros)
+## 5. Arquitetura do Sistema - Diagramas UML
+
+Os diagramas a seguir representam a arquitetura do sistema completo apos a migracao, auxiliando na compreensao das responsabilidades de cada componente e de como o sistema e implantado.
+
+### 5.1 Diagrama de Componentes
+
+Exibe os principais componentes do sistema, suas interfaces e dependencias.
+
+```mermaid
+flowchart TB
+    subgraph FRONTEND[Camada Frontend - Angular - Porta 4200]
+        APP[AppComponent]
+        LP[ListaProdutosComponent]
+        FP[FormProdutoComponent]
+        APS[ProdutoService - Angular]
+        ATS[TipoProdutoService - Angular]
+        APP --> LP
+        APP --> FP
+        LP --> APS
+        FP --> APS
+        FP --> ATS
+    end
+
+    subgraph BACKEND[Camada Backend - Spring Boot - Porta 8080]
+        PC[ProdutoController]
+        TC[TipoProdutoController]
+        EH[GlobalExceptionHandler]
+        PSV[ProdutoService]
+        TSV[TipoProdutoService]
+        PR[ProdutoRepository]
+        TR[TipoProdutoRepository]
+        PD[Produto - Domain]
+        TD[TipoProduto - Domain]
+        PC --> PSV
+        TC --> TSV
+        PSV --> PR
+        TSV --> TR
+        PSV --> PD
+        TSV --> TD
+    end
+
+    subgraph DATABASE[Banco de Dados]
+        DB[(H2 ou PostgreSQL)]
+    end
+
+    APS -->|HTTP REST /api/produtos| PC
+    ATS -->|HTTP REST /api/tipos-produto| TC
+    PR -->|JPA / JDBC| DB
+    TR -->|JPA / JDBC| DB
+```
+
+### 5.2 Diagrama de Implantacao
+
+Exibe os nos fisicos onde os artefatos do sistema sao instalados e executados.
+
+```mermaid
+flowchart LR
+    subgraph USER_NODE[device: Maquina do Usuario]
+        BROWSER[Navegador Web - Chrome ou Firefox]
+    end
+
+    subgraph APP_NODE[executionEnvironment: Servidor de Aplicacao]
+        NG_SERVER[Angular Dev Server - Node.js - Porta 4200]
+        SB_APP[Spring Boot App - JVM - Porta 8080]
+    end
+
+    subgraph DB_NODE[device: Servidor de Banco de Dados]
+        DB[(H2 em Memoria ou PostgreSQL)]
+    end
+
+    BROWSER -->|HTTP :4200| NG_SERVER
+    NG_SERVER -->|HTTP REST :8080 - CORS habilitado| SB_APP
+    SB_APP -->|JDBC| DB
+```
+
+> **Nota de producao:** Ao executar `ng build`, o Angular gera arquivos estaticos que podem ser servidos diretamente pelo Spring Boot, eliminando a necessidade de um servidor Node.js separado em ambiente de producao.
+
+## 6. Cronograma Sugerido (6 encontros)
 
 ### Encontro 1 - Ambiente e Visao Geral
 
@@ -199,7 +276,7 @@ Erros comuns:
 - Projeto roda apenas na maquina de quem desenvolveu.
 - Falta de descricao clara no README.
 
-## 6. Passo a Passo Tecnico para os Alunos
+## 7. Passo a Passo Tecnico para os Alunos
 
 ### Etapa A - Criar Backend Spring Boot
 
@@ -245,7 +322,7 @@ Erros comuns:
    - remover no Angular
 3. Corrigir erros de validacao exibidos na interface.
 
-## 7. Padroes de Projeto que Devem Aparecer
+## 8. Padroes de Projeto que Devem Aparecer
 
 No backend:
 
@@ -259,7 +336,7 @@ No frontend:
 1. Observer (fluxo assincrono com RxJS).
 2. Facade simples via service de dominio (opcional para turmas iniciantes).
 
-## 8. Rubrica de Avaliacao (100 pontos)
+## 9. Rubrica de Avaliacao (100 pontos)
 
 1. Funcionamento do CRUD completo (backend + frontend): 35 pontos.
 2. Organizacao em camadas e separacao de responsabilidades: 20 pontos.
@@ -267,7 +344,7 @@ No frontend:
 4. Aplicacao correta de padroes de projeto: 15 pontos.
 5. Qualidade da documentacao e apresentacao final: 15 pontos.
 
-## 9. Modelo de Entrega
+## 10. Modelo de Entrega
 
 Cada grupo deve entregar:
 
@@ -282,7 +359,7 @@ Cada grupo deve entregar:
    - dificuldades encontradas
    - melhorias futuras
 
-## 10. Perguntas Guia para Apresentacao dos Alunos
+## 11. Perguntas Guia para Apresentacao dos Alunos
 
 1. Onde fica a regra de negocio no sistema de voces?
 2. Qual foi a principal mudanca ao migrar de console para web?
@@ -290,7 +367,7 @@ Cada grupo deve entregar:
 4. Como voces tratam erros de validacao?
 5. Qual padrao de projeto trouxe maior ganho e por que?
 
-## 11. Roteiro de Correcao Rapida para o Professor
+## 12. Roteiro de Correcao Rapida para o Professor
 
 1. O projeto sobe com um comando claro?
 2. O backend responde endpoints essenciais?
@@ -298,7 +375,7 @@ Cada grupo deve entregar:
 4. Existe padrao minimo de organizacao arquitetural?
 5. O grupo consegue explicar as decisoes tomadas?
 
-## 12. Extensoes Opcionais (Para Turmas Mais Avancadas)
+## 13. Extensoes Opcionais (Para Turmas Mais Avancadas)
 
 1. Substituir H2 por PostgreSQL.
 2. Implementar atualizacao (PUT) com validacoes.
@@ -306,7 +383,7 @@ Cada grupo deve entregar:
 4. Criar testes unitarios no backend.
 5. Criar interceptor Angular para erros globais.
 
-## 13. Conclusao
+## 14. Conclusao
 
 Este tutorial foi planejado para iniciantes e prioriza evolucao incremental. A cada encontro, o aluno aprende um bloco pequeno e funcional, reduzindo a complexidade da migracao.
 O foco nao e apenas ter um sistema pronto, mas entender por que a arquitetura web com Spring e Angular melhora organizacao, manutencao e escalabilidade.
