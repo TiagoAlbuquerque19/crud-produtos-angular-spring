@@ -1132,6 +1132,18 @@ Com Swagger, o aluno vê rapidamente:
 - os parâmetros esperados;
 - o formato JSON dos DTOs.
 
+#### O que é OpenAPI?
+
+OpenAPI é uma especificação padrão para descrever APIs REST. Ela define como escrever o contrato da API em JSON ou YAML, incluindo:
+
+- os endpoints disponíveis;
+- os verbos HTTP usados;
+- os parâmetros e cabeçalhos;
+- o corpo de request e response;
+- os códigos de resposta.
+
+Em outras palavras, o OpenAPI é o documento que descreve a API, e o Swagger é a interface que consome essa descrição e mostra a documentação/testes interativos.
+
 #### Como configurar Swagger no Spring Boot
 
 Para adicionar Swagger ao backend Spring Boot, basta incluir a dependência Springdoc OpenAPI no `pom.xml`:
