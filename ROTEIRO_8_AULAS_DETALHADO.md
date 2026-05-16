@@ -1063,6 +1063,59 @@ Checkpoint:
 
 ### Parte 1: O que sao Endpoints REST (30 min)
 
+#### O que é um Serviço REST?
+
+REST = Representational State Transfer (Transferência de Estado Representacional).
+
+É um estilo arquitetural para construir APIs web usando padrões HTTP.
+
+Conceitos principais:
+
+**Recurso:** Tudo é um recurso (Produto, TipoProduto, Usuário, etc).
+
+- Cada recurso tem uma URL única (ex: `/produtos`, `/produtos/1`).
+- Um recurso pode ter múltiplas representações (JSON, XML, etc).
+
+**Estados e Operações:** Operações HTTP modificam o estado do recurso.
+
+- GET = ler estado do recurso
+- POST = criar novo recurso
+- PUT/PATCH = modificar recurso existente
+- DELETE = remover recurso
+
+**Stateless (sem estado):** Cada requisição é independente.
+
+- Servidor não guarda sessão do cliente.
+- Cliente envia todas as informações necessárias em cada requisição.
+- Facilita escalabilidade (qualquer servidor pode responder).
+
+**Representação:** Recurso é transferido em formato (JSON, XML).
+
+- Servidor retorna `Content-Type: application/json`.
+- Cliente interpreta o formato recebido.
+
+Exemplo prático:
+
+```
+Cliente quer ver Produto com id=5:
+  GET /produtos/5
+  |
+Servidor retorna:
+  {
+    "id": 5,
+    "nome": "Notebook",
+    "preco": 3000.0,
+    "tipo": "Eletrônico"
+  }
+```
+
+Vantagens de REST:
+
+- Simples de entender e usar.
+- Aproveita toda a infraestrutura HTTP.
+- Escalável (stateless).
+- Independente de linguagem/plataforma.
+
 #### Verbos HTTP
 
 GET = obter dados (nao modifica).
