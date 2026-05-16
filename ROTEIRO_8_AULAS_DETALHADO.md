@@ -1344,6 +1344,19 @@ Checkpoint:
 
 #### 45-60 min: Configurar CORS para futura integracao com Angular
 
+#### O que é CORS (breve explicação)
+
+CORS (Cross-Origin Resource Sharing) é o mecanismo usado pelos navegadores para controlar requisições entre origens diferentes (por exemplo, `http://localhost:4200` -> `http://localhost:8080`). Por padrão a Same‑Origin Policy bloqueia requisições cross‑origin; o servidor precisa retornar cabeçalhos CORS apropriados para permitir que o browser envie ou leia respostas.
+
+Pontos importantes:
+
+- `Access-Control-Allow-Origin`: origens permitidas (ex.: `http://localhost:4200` ou `*`).
+- `Access-Control-Allow-Methods`: métodos permitidos (`GET, POST, PUT, DELETE`).
+- `Access-Control-Allow-Headers`: cabeçalhos permitidos (`Content-Type`, `Authorization`).
+- Requisições "não simples" disparam um preflight `OPTIONS` que o servidor deve responder com permissões.
+
+No projeto, a configuração abaixo permite que o frontend Angular local (`http://localhost:4200`) faça requisições ao backend.
+
 Arquivo: src/main/java/br/unifor/produtosapi/config/CorsConfig.java
 
 ```java
@@ -1382,7 +1395,49 @@ git commit -m "aula5: controllers rest e endpoints completos"
 - Por que 201 em POST?
 - O que faz @Valid?
 
----
+- O que é REST e quais são seus princípios básicos?
+- O que é Swagger/OpenAPI e como ele gera documentação interativa?
+- Qual a diferença prática entre testar com Postman e com Swagger UI?
+- O que é CORS e por que precisamos configurá-lo para o frontend Angular?
+- Quando usar POST vs PUT vs PATCH na API?
+- Como mapear DTOs para entidades e por que não expor entidades diretamente?
+- Como funcionam as validações com Bean Validation e como o Spring retorna erros?
+- Quais códigos HTTP devemos usar para sucesso, criação, erro de validação e recurso não encontrado?
+
+#### Respostas sugeridas (curtas)
+
+- **Qual diferença entre GET e POST?**
+  - `GET` recupera recursos (seguro, idempotente); `POST` cria recursos (não idempotente) e costuma enviar um body.
+
+- **Por que 201 em POST?**
+  - `201 Created` indica que um recurso foi criado com sucesso; a resposta costuma conter o header `Location` apontando para o novo recurso.
+
+- **O que faz `@Valid`?**
+  - Dispara a validação das anotações de Bean Validation no DTO; em caso de erro o Spring lança `MethodArgumentNotValidException` e retorna `400 Bad Request` por padrão (pode ser customizado).
+
+- **O que é REST e quais são seus princípios básicos?**
+  - REST (Representational State Transfer) é um estilo arquitetural: recursos identificados por URIs, uso de verbos HTTP, mensagens auto-descritivas, e statelessness (sem estado no servidor).
+
+- **O que é Swagger/OpenAPI e como ele gera documentação interativa?**
+  - OpenAPI é a especificação (contrato) da API em JSON/YAML; Swagger (UI) consome esse documento e gera uma interface interativa que mostra endpoints, modelos e permite enviar requisições.
+
+- **Qual a diferença prática entre testar com Postman e com Swagger UI?**
+  - `Postman` é um cliente HTTP completo (coleções, testes, ambientes, scripts). `Swagger UI` é uma documentação interativa gerada automaticamente para explorar e testar endpoints rapidamente.
+
+- **O que é CORS e por que precisamos configurá-lo para o frontend Angular?**
+  - CORS é um mecanismo de segurança do navegador que bloqueia requisições entre origens diferentes por padrão; o servidor precisa permitir explicitamente as origens/métodos para que o frontend (`http://localhost:4200`) faça chamadas ao backend.
+
+- **Quando usar POST vs PUT vs PATCH na API?**
+  - `POST` para criar; `PUT` para substituir/atualizar toda a representação (idempotente); `PATCH` para atualização parcial (apenas campos necessários).
+
+- **Como mapear DTOs para entidades e por que não expor entidades diretamente?**
+  - Mapear manualmente ou com bibliotecas (MapStruct/ModelMapper). Não exponha entidades porque elas carregam detalhes de persistência e podem permitir over-posting; DTOs decouplam contratos da API.
+
+- **Como funcionam as validações com Bean Validation e como o Spring retorna erros?**
+  - Anotações como `@NotBlank`, `@Positive` no DTO; `@Valid` no controller ativa a validação; Spring retorna `400 Bad Request` com detalhes de campos inválidos (personalizável via `@ControllerAdvice`).
+
+- **Quais códigos HTTP devemos usar para sucesso, criação, erro de validação e recurso não encontrado?**
+  - Sucesso: `200 OK`; Criação: `201 Created`; Erro de validação: `400 Bad Request`; Recurso não encontrado: `404 Not Found`.
 
 ## Aula 6 (90 min) - Frontend Angular Basico
 
