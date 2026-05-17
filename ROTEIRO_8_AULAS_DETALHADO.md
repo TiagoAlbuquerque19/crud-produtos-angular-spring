@@ -1915,7 +1915,7 @@ O comando `ng generate component` cria:
 
 E registra automaticamente os componentes no Angular, sem precisar de um `AppModule` tradicional, usando `bootstrapApplication` e providers no `app.config.ts`.
 
-#### 60-75 min: Testar serviço simples
+#### 60-75 min: Criar componente lista-produtos completo
 
 Editar `src/app/components/lista-produtos/lista-produtos.ts`:
 
@@ -1967,6 +1967,13 @@ export class ListaProdutosComponent implements OnInit {
       }
     );
   }
+
+  deletar(id: number) {
+    this.api.deletarProduto(id).subscribe(
+      () => this.carregarProdutos(),
+      erro => console.error('Erro ao deletar', erro)
+    );
+  }
 }
 ```
 
@@ -1974,44 +1981,45 @@ Editar `src/app/components/lista-produtos/lista-produtos.html`:
 
 ```html
 <h2>Produtos</h2>
-<p *ngIf="carregando">Carregando...</p>
-
-<div *ngIf="!carregando">
-  <p *ngIf="produtos.length > 0">Produtos encontrados: {{ produtos.length }}</p>
-
-  <ul *ngIf="produtos.length > 0">
-    <li *ngFor="let produto of produtos">
-      <strong>{{ produto?.nome }}</strong> - R$ {{ produto?.preco }}
-      <br>
-      <small>Tipo: {{ produto?.tipo?.nome }}</small>
-      <button (click)="deletar(produto?.id)">Deletar</button>
-    </li>
-  </ul>
-
-  <p *ngIf="produtos.length === 0">Nenhum produto encontrado.</p>
-</div>
+<table border="1">
+  <tr>
+    <th>Nome</th>
+    <th>Preco</th>
+    <th>Tipo</th>
+    <th>Acao</th>
+  </tr>
+  <tr *ngFor="let produto de produtos">
+    <td>{{ produto.nome }}</td>
+    <td>R$ {{ produto.preco }}</td>
+    <td>{{ produto.tipoNome }}</td>
+    <td>
+      <button (click)="deletar(produto.id)">Deletar</button>
+    </td>
+  </tr>
+</table>
 ```
 
 Sintaxe usada:
 
 - `standalone: true`: torna o componente independente, sem `AppModule`.
 - `imports: [CommonModule]`: importa diretivas como `*ngIf` e `*ngFor`.
-- `*ngIf="carregando"`: renderiza apenas se a expressão for true.
-- `*ngFor="let produto of produtos"`: repete elemento para cada item da lista.
-- `{{ produto?.nome }}`: interpolação com safe navigation para evitar erros se o objeto estiver vazio.
-- `{{ produto?.tipo?.nome }}`: acessa o nome do tipo apenas se `tipo` existir.
-- `(click)="deletar(produto?.id)"`: event binding que chama método ao clicar.
+- `*ngFor="let produto of produtos"`: repete linha da tabela para cada produto.
+- `{{ produto.nome }}`: interpolação para exibir o nome do produto.
+- `{{ produto.tipoNome }}`: exibe o nome do tipo recebido diretamente do backend.
+- `(click)="deletar(produto.id)"`: event binding que chama `deletar()` ao clicar.
+- `deletar()`: chama a API, e ao concluir recarrega a lista automaticamente.
 
 #### 75-90 min: Verificacao
 
 Backend rodando na porta 8080.
 Frontend rodando na porta 4200.
-Lista de produtos aparece na tela e o estado `carregando` é desligado quando os dados chegam.
+Lista de produtos aparece na tela em formato de tabela, e o botão Deletar remove o produto e recarrega a lista.
 
 Checkpoint:
 
 - Angular consome dados do backend via serviço.
-- Componente exibe lista dinamicamente.
+- Componente exibe lista de produtos em tabela.
+- Botão Deletar funciona: remove o produto e atualiza a lista automaticamente.
 - Fluxo completo: backend API → serviço Angular → componente → template.
 - A aplicação usa `bootstrapApplication(App, appConfig)` em vez de `AppModule`.
 
@@ -2108,40 +2116,9 @@ Em `src/app/components/form-produto/form-produto.html`:
 <p *ngIf="mensagem">{{ mensagem }}</p>
 ```
 
-### Parte 2: Excluir e integrar componentes (45 min)
+### Parte 2: Integrar componentes no app (45 min)
 
-Adicionar metodo em `src/app/components/lista-produtos/lista-produtos.ts`:
-
-```typescript
-deletar(id: number) {
-  this.api.deletarProduto(id).subscribe(
-    () => this.carregarProdutos(),
-    erro => console.error('Erro ao deletar', erro)
-  );
-}
-```
-
-Atualizar `src/app/components/lista-produtos/lista-produtos.html`:
-
-```html
-<h2>Produtos</h2>
-<table border="1">
-  <tr>
-    <th>Nome</th>
-    <th>Preco</th>
-    <th>Tipo</th>
-    <th>Acao</th>
-  </tr>
-  <tr *ngFor="let produto of produtos">
-    <td>{{ produto.nome }}</td>
-    <td>R$ {{ produto.preco }}</td>
-    <td>{{ produto.tipoNome }}</td>
-    <td>
-      <button (click)="deletar(produto.id)">Deletar</button>
-    </td>
-  </tr>
-</table>
-```
+> O componente `lista-produtos` já está completo desde a Aula 6, incluindo o botão Deletar e o método `deletar()`. Nesta aula não é necessário alterá-lo.
 
 Editar `src/app/app.html` para mostrar ambos:
 
