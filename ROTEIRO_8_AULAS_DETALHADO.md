@@ -1521,7 +1521,7 @@ adicionarProduto(p: Produto): void {
 
 #### Conceitos fundamentais
 
-**Módulos:** Organizam aplicação em blocos. O `AppModule` é o raiz; agrupa componentes, services, pipes. Cada módulo é uma classe marcada com `@NgModule`.
+**Módulos:** Organizam aplicação em blocos. Neste projeto Angular 21+ usamos componentes standalone em vez de um `AppModule` tradicional. A aplicação raiz é `app.ts` e o bootstrap é feito por `main.ts`.
 
 **Dependency Injection (DI):** Padrão onde o framework injeta dependências (services) nos componentes. Reduz acoplamento. Ex: `constructor(private api: ProdutoApiService) { }`.
 
@@ -1564,12 +1564,12 @@ app/
     app.config.ts = configuração de providers e rotas
     app.routes.ts = definição de rotas
     services/
-      produto-api.service.ts = serviço que chama API
+      produto-api.ts = serviço que chama API
     components/
       lista-produtos/
-        lista-produtos.component.ts
-        lista-produtos.component.html
-        lista-produtos.component.css
+        lista-produtos.ts
+        lista-produtos.html
+        lista-produtos.css
 ```
 
 #### Template syntax (HTML com Angular)
@@ -1621,8 +1621,8 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-lista-produtos',    // nome da tag HTML
-  templateUrl: './lista-produtos.component.html',
-  styleUrls: ['./lista-produtos.component.css']
+  templateUrl: './lista-produtos.html',
+  styleUrls: ['./lista-produtos.css']
 })
 export class ListaProdutosComponent implements OnInit {
   
@@ -1747,9 +1747,9 @@ No PowerShell (na pasta `produtos-web`):
 ng generate service services/produto-api
 ```
 
-Comando gera: `src/app/services/produto-api.service.ts` e `src/app/services/produto-api.service.spec.ts` (testes).
+Comando gera: `src/app/services/produto-api.ts` (se for criado manualmente, use este nome) e `src/app/services/produto-api.spec.ts` para testes.
 
-Editar `src/app/services/produto-api.service.ts`:
+Editar `src/app/services/produto-api.ts`:
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -1825,7 +1825,7 @@ export const appConfig: ApplicationConfig = {
 Explicações:
 
 - `provideHttpClient()`: habilita HttpClient no app, necessário para `ProdutoApiService`.
-- `provideForms()`: habilita `NgModel` e formulários template-driven.
+- `importProvidersFrom(FormsModule)`: habilita `NgModel` e formulários template-driven.
 - `provideRouter(routes)`: habilita rotas.
 - `provideBrowserGlobalErrorListeners()`: captura erros globais no browser.
 
@@ -1851,37 +1851,48 @@ E registra automaticamente os componentes no Angular, sem precisar de um `AppMod
 
 #### 60-75 min: Testar serviço simples
 
-Editar `src/app/components/lista-produtos/lista-produtos.component.ts`:
+Editar `src/app/components/lista-produtos/lista-produtos.ts`:
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
-import { ProdutoApiService } from '../../services/produto-api.service';
+import { CommonModule } from '@angular/common';
+import { ProdutoApiService } from '../../services/produto-api';
 
 @Component({
-  selector: 'app-lista-produtos',   // Usável como <app-lista-produtos></app-lista-produtos>
-  templateUrl: './lista-produtos.component.html',
-  styleUrls: ['./lista-produtos.component.css']
+  selector: 'app-lista-produtos',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './lista-produtos.html',
+  styleUrls: ['./lista-produtos.css']
 })
 export class ListaProdutosComponent implements OnInit {
-  
-  // Propriedades observáveis no template
   produtos: any[] = [];
-  carregando: boolean = false;
-  
-  // Injeta o serviço de API
+  carregando = false;
+
   constructor(private api: ProdutoApiService) { }
-  
-  // Chamado automaticamente após o componente ser criado
+
   ngOnInit(): void {
     this.carregarProdutos();
   }
-  
-  // Busca produtos do backend
+
   carregarProdutos() {
     this.carregando = true;
     this.api.getProdutos().subscribe(
       dados => {
-        this.produtos = dados;
+        let arr: any[] = [];
+        if (Array.isArray(dados)) {
+          arr = dados;
+        } else if (dados && Array.isArray((dados as any).content)) {
+          arr = (dados as any).content;
+        } else if (dados && Array.isArray((dados as any).data)) {
+          arr = (dados as any).data;
+        }
+
+        this.produtos = arr.map(p => ({
+          ...p,
+          tipo: p.tipo ?? (p.tipoNome ? { nome: p.tipoNome } : undefined)
+        }));
+
         this.carregando = false;
       },
       erro => {
@@ -1893,50 +1904,50 @@ export class ListaProdutosComponent implements OnInit {
 }
 ```
 
-Editar `src/app/components/lista-produtos/lista-produtos.component.html`:
+Editar `src/app/components/lista-produtos/lista-produtos.html`:
 
 ```html
 <h2>Produtos</h2>
-
-<!-- Mostra mensagem enquanto carrega -->
 <p *ngIf="carregando">Carregando...</p>
 
-<!-- Mostra lista quando dados chegam -->
-<ul *ngIf="!carregando && produtos.length > 0">
-  <li *ngFor="let produto of produtos">
-    <strong>{{ produto.nome }}</strong> - R$ {{ produto.preco }}
-    <br>
-    <small>Tipo: {{ produto.tipo?.nome }}</small>
-    <button (click)="deletar(produto.id)">Deletar</button>
-  </li>
-</ul>
+<div *ngIf="!carregando">
+  <p *ngIf="produtos.length > 0">Produtos encontrados: {{ produtos.length }}</p>
 
-<!-- Mostra mensagem se nenhum produto -->
-<p *ngIf="!carregando && produtos.length === 0">
-  Nenhum produto encontrado.
-</p>
+  <ul *ngIf="produtos.length > 0">
+    <li *ngFor="let produto of produtos">
+      <strong>{{ produto?.nome }}</strong> - R$ {{ produto?.preco }}
+      <br>
+      <small>Tipo: {{ produto?.tipo?.nome }}</small>
+      <button (click)="deletar(produto?.id)">Deletar</button>
+    </li>
+  </ul>
+
+  <p *ngIf="produtos.length === 0">Nenhum produto encontrado.</p>
+</div>
 ```
 
 Sintaxe usada:
 
+- `standalone: true`: torna o componente independente, sem `AppModule`.
+- `imports: [CommonModule]`: importa diretivas como `*ngIf` e `*ngFor`.
 - `*ngIf="carregando"`: renderiza apenas se a expressão for true.
 - `*ngFor="let produto of produtos"`: repete elemento para cada item da lista.
-- `{{ produto.nome }}`: interpolação (exibe valor da propriedade).
-- `{{ produto.tipo?.nome }}`: safe navigation operator (evita erro se `tipo` for null).
-- `(click)="deletar(produto.id)"`: event binding (chama método ao clicar).
+- `{{ produto?.nome }}`: interpolação com safe navigation para evitar erros se o objeto estiver vazio.
+- `{{ produto?.tipo?.nome }}`: acessa o nome do tipo apenas se `tipo` existir.
+- `(click)="deletar(produto?.id)"`: event binding que chama método ao clicar.
 
 #### 75-90 min: Verificacao
 
 Backend rodando na porta 8080.
 Frontend rodando na porta 4200.
-Lista de produtos aparece na tela.
+Lista de produtos aparece na tela e o estado `carregando` é desligado quando os dados chegam.
 
 Checkpoint:
 
 - Angular consome dados do backend via serviço.
 - Componente exibe lista dinamicamente.
 - Fluxo completo: backend API → serviço Angular → componente → template.
-- Angular consome dados do backend.
+- A aplicação usa `bootstrapApplication(App, appConfig)` em vez de `AppModule`.
 
 ---
 
@@ -1944,45 +1955,47 @@ Checkpoint:
 
 ### Parte 1: Formulario de cadastro (45 min)
 
-Em form-produto.component.ts:
+Em `src/app/components/form-produto/form-produto.ts`:
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
-import { ProdutoApiService } from '../../services/produto-api.service';
+import { FormsModule } from '@angular/forms';
+import { ProdutoApiService } from '../../services/produto-api';
 
 @Component({
   selector: 'app-form-produto',
-  templateUrl: './form-produto.component.html',
-  styleUrls: ['./form-produto.component.css']
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './form-produto.html',
+  styleUrls: ['./form-produto.css']
 })
 export class FormProdutoComponent implements OnInit {
-  
-  nome: string = '';
-  preco: number = 0;
-  tipoId: number = 0;
+  nome = '';
+  preco = 0;
+  tipoId = 0;
   tipos: any[] = [];
-  mensagem: string = '';
-  
+  mensagem = '';
+
   constructor(private api: ProdutoApiService) { }
-  
+
   ngOnInit(): void {
     this.carregarTipos();
   }
-  
+
   carregarTipos() {
     this.api.getTipos().subscribe(
       dados => this.tipos = dados,
       erro => console.error('Erro ao carregar tipos', erro)
     );
   }
-  
+
   salvar() {
     const novo = {
       nome: this.nome,
       preco: this.preco,
       tipoId: this.tipoId
     };
-  
+
     this.api.criarProduto(novo).subscribe(
       () => {
         this.mensagem = 'Produto criado com sucesso!';
@@ -1998,7 +2011,7 @@ export class FormProdutoComponent implements OnInit {
 }
 ```
 
-Em form-produto.component.html:
+Em `src/app/components/form-produto/form-produto.html`:
 
 ```html
 <h2>Cadastro de Produto</h2>
@@ -2031,7 +2044,7 @@ Em form-produto.component.html:
 
 ### Parte 2: Excluir e integrar componentes (45 min)
 
-Adicionar metodo em lista-produtos.component.ts:
+Adicionar metodo em `src/app/components/lista-produtos/lista-produtos.ts`:
 
 ```typescript
 deletar(id: number) {
@@ -2042,7 +2055,7 @@ deletar(id: number) {
 }
 ```
 
-Atualizar lista-produtos.component.html:
+Atualizar `src/app/components/lista-produtos/lista-produtos.html`:
 
 ```html
 <h2>Produtos</h2>
@@ -2064,7 +2077,7 @@ Atualizar lista-produtos.component.html:
 </table>
 ```
 
-Editar app.component.html para mostrar ambos:
+Editar `src/app/app.html` para mostrar ambos:
 
 ```html
 <h1>Sistema de Produtos</h1>
