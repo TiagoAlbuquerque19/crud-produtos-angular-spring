@@ -1453,6 +1453,70 @@ Componentes = blocos reutilizaveis.
 
 Services = classes que compartilham dados/logica.
 
+#### O que é TypeScript?
+
+TypeScript é uma linguagem construída sobre JavaScript que adiciona tipagem estática opcional.
+
+**JavaScript vs TypeScript:**
+
+JavaScript:
+```javascript
+function somar(a, b) {
+  return a + b;
+}
+somar(5, 10);    // 15 ✓
+somar("5", 10);  // "510" (concatenação, erro silencioso!)
+```
+
+TypeScript:
+```typescript
+function somar(a: number, b: number): number {
+  return a + b;
+}
+somar(5, 10);    // 15 ✓
+somar("5", 10);  // Erro: Type 'string' is not assignable to type 'number' (detectado em desenvolvimento!)
+```
+
+**Benefícios de TypeScript:**
+
+- **Tipagem estática:** declare tipos das variáveis, parâmetros, retornos; IDE detecta erros antes de executar.
+- **IntelliSense melhorado:** editor sugere métodos/propriedades corretos (autocomplete).
+- **Refatoração segura:** renomear variável/função afeta todas as referências.
+- **Documentação automática:** tipos servem como documentação viva.
+- **Interfaces e tipos:** defina contratos claros (ex: `interface Produto { nome: string; preco: number; }`).
+- **Classes e herança:** suporte full a orientação a objetos.
+
+**Como funciona:**
+
+1. Escreva código em TypeScript (`.ts`).
+2. Compilador TypeScript transpila para JavaScript (`.js`).
+3. Navegador executa o JavaScript.
+
+Em Angular, o TypeScript é obrigatório — componentes, services, etc são todas classes TypeScript tipadas.
+
+**Exemplo prático em Angular:**
+
+```typescript
+// Define tipo da interface
+interface Produto {
+  id: number;
+  nome: string;
+  preco: number;
+}
+
+// Propriedade com tipo explícito
+produtos: Produto[] = [];
+
+// Método com tipagem completa
+adicionarProduto(p: Produto): void {
+  this.produtos.push(p);
+}
+
+// Sem TypeScript seria
+// produtos = [];  // Type: any
+// adicionarProduto(p) { this.produtos.push(p); }  // Sem validação
+```
+
 #### Conceitos fundamentais
 
 **Módulos:** Organizam aplicação em blocos. O `AppModule` é o raiz; agrupa componentes, services, pipes. Cada módulo é uma classe marcada com `@NgModule`.
@@ -1461,7 +1525,24 @@ Services = classes que compartilham dados/logica.
 
 **Decoradores:** Anotações que adicionam metadados. `@Component` marca uma classe como componente; `@Injectable` marca um serviço; `@NgModule` marca um módulo.
 
-**Observables (RxJS):** Fluxo assíncrono de dados. HTTP requests retornam Observables; `.subscribe()` reage a novos dados. Ex: `this.api.getProdutos().subscribe(dados => this.produtos = dados)`.
+**RxJS e Observables:**
+
+RxJS é a biblioteca usada pelo Angular para programação reativa com streams de dados.
+
+- `Observable` é uma sequência de valores no tempo; pode emitir zero, um ou múltiplos valores.
+- Diferente de `Promise`, um `Observable` pode emitir muitos valores e também ser cancelado.
+- HTTP em Angular retorna `Observable` porque a resposta chega no futuro e pode ser manipulada com operadores.
+
+Exemplo:
+
+```typescript
+this.api.getProdutos()
+  .subscribe(dados => this.produtos = dados);
+```
+
+- `.subscribe(...)` ativa o Observable e recebe os dados quando chegam.
+- `pipe(...)` permite encadear operadores como `map`, `filter`, `catchError`.
+- `Observable` é ótimo para eventos, requisições HTTP, tempo, formulários reativos e valores assíncronos.
 
 **Ciclo de vida:** Componentes têm fases (criação, renderização, destruição).
   - `ngOnInit`: chamado uma vez, após o componente ser criado.
@@ -1569,6 +1650,56 @@ export class ListaProdutosComponent implements OnInit {
 ```
 
 ### Parte 2: Criar projeto Angular (60 min)
+
+#### O que é ng (Angular CLI)?
+
+`ng` é o Angular Command Line Interface — uma ferramenta de terminal que automatiza tarefas comuns de desenvolvimento Angular.
+
+Foi instalada globalmente no computador com:
+
+```powershell
+npm install -g @angular/cli
+```
+
+Comandos principais:
+
+- `ng new <nome>` — cria novo projeto Angular com toda a estrutura de pastas e dependências.
+- `ng generate component <caminho>` (ou `ng g c`) — gera novo componente automaticamente.
+- `ng generate service <caminho>` (ou `ng g s`) — gera novo serviço automaticamente.
+- `ng serve` — inicia servidor de desenvolvimento (localhost:4200) com hot reload (recarrega automático quando edita).
+- `ng build` — compila o projeto para produção em pasta `dist/`.
+- `ng test` — executa testes unitários.
+
+**Por que usar ng?**
+
+Sem ng, você precisaria:
+1. Criar arquivos `.ts`, `.html`, `.css` manualmente.
+2. Escrever boilerplate (código repetitivo).
+3. Registrar componentes manualmente no `app.module.ts`.
+
+Com ng, tudo é automático — economiza tempo e reduz erros.
+
+**Exemplos de uso:**
+
+```powershell
+# Cria novo projeto
+ng new meu-app
+
+# Entra na pasta
+cd meu-app
+
+# Inicia servidor (porta 4200)
+ng serve
+
+# Em outra aba do PowerShell, gera componente
+ng generate component components/lista
+
+# Gera serviço
+ng generate service services/api
+
+# Build para produção
+ng build --prod
+```
 
 #### 00-15 min: Gerar projeto
 
