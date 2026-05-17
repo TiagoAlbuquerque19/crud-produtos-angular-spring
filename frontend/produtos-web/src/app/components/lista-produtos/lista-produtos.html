@@ -3,7 +3,7 @@
 <!-- Mostra mensagem enquanto carrega -->
 <p *ngIf="carregando">Carregando...</p>
 
-<div *ngIf="!carregando">
+<div *ngIf="carregando">
   <p *ngIf="produtos.length > 0">Produtos encontrados: {{ produtos.length }}</p>
 
   <ul *ngIf="produtos.length > 0">
