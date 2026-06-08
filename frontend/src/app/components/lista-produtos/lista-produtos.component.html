@@ -1,5 +1,112 @@
-<h1>Lista de Produtos</h1>
+<header>
+  <h1>Cadastro de Produtos</h1>
+  <p>Gerencie produtos e seus tipos.</p>
+</header>
 
-<p *ngFor="let produto of produtos">
-  {{ produto.nome }} - {{ produto.preco }} - {{ produto.tipoNome }}
-</p>
+<p class="mensagem sucesso" *ngIf="mensagem">{{ mensagem }}</p>
+<p class="mensagem erro" *ngIf="erro">{{ erro }}</p>
+
+<section>
+  <h2>Tipos de produto</h2>
+
+  <form (ngSubmit)="criarTipo()">
+    <label>
+      Nome do tipo
+      <input
+        type="text"
+        name="novoTipoNome"
+        [(ngModel)]="novoTipoNome"
+        placeholder="Ex.: Eletrônico"
+      />
+    </label>
+    <button type="submit">Cadastrar tipo</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th class="acoes">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tipo of tipos">
+        <td>{{ tipo.nome }}</td>
+        <td class="acoes">
+          <button type="button" class="excluir" (click)="excluirTipo(tipo.id)">
+            Excluir
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="tipos.length === 0">
+        <td colspan="2">Nenhum tipo cadastrado.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Produtos</h2>
+
+  <form (ngSubmit)="criarProduto()">
+    <label>
+      Nome
+      <input
+        type="text"
+        name="produtoNome"
+        [(ngModel)]="novoProduto.nome"
+        placeholder="Ex.: Notebook"
+      />
+    </label>
+    <label>
+      Preço
+      <input
+        type="number"
+        name="produtoPreco"
+        [(ngModel)]="novoProduto.preco"
+        min="0.01"
+        step="0.01"
+      />
+    </label>
+    <label>
+      Tipo
+      <select name="produtoTipo" [(ngModel)]="novoProduto.tipoId">
+        <option [ngValue]="0">Selecione um tipo</option>
+        <option *ngFor="let tipo of tipos" [ngValue]="tipo.id">
+          {{ tipo.nome }}
+        </option>
+      </select>
+    </label>
+    <button type="submit">Cadastrar produto</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Preço</th>
+        <th>Tipo</th>
+        <th class="acoes">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let produto of produtos">
+        <td>{{ produto.nome }}</td>
+        <td>{{ produto.preco | currency: 'BRL' }}</td>
+        <td>{{ produto.tipoNome }}</td>
+        <td class="acoes">
+          <button
+            type="button"
+            class="excluir"
+            (click)="excluirProduto(produto.id)"
+          >
+            Excluir
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="produtos.length === 0">
+        <td colspan="4">Nenhum produto cadastrado.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

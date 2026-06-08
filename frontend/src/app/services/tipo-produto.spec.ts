@@ -1,21 +1,21 @@
-import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 
-import { ProdutoService } from './produto';
+import { TipoProdutoService } from './tipo-produto';
 
-describe('ProdutoService', () => {
-  let service: ProdutoService;
+describe('TipoProdutoService', () => {
+  let service: TipoProdutoService;
   let httpTesting: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
-    service = TestBed.inject(ProdutoService);
+    service = TestBed.inject(TipoProdutoService);
     httpTesting = TestBed.inject(HttpTestingController);
   });
 
@@ -23,15 +23,15 @@ describe('ProdutoService', () => {
     httpTesting.verify();
   });
 
-  it('should use the product API endpoints', () => {
+  it('should use the product type API endpoints', () => {
     service.listar().subscribe();
-    httpTesting.expectOne('http://localhost:8080/produtos').flush([]);
+    httpTesting.expectOne('http://localhost:8080/tipos-produto').flush([]);
 
-    service.criar({ nome: 'Notebook', preco: 3500, tipoId: 1 }).subscribe();
+    service.criar('Eletrônico').subscribe();
     httpTesting
       .expectOne({
         method: 'POST',
-        url: 'http://localhost:8080/produtos',
+        url: 'http://localhost:8080/tipos-produto',
       })
       .flush({});
 
@@ -39,7 +39,7 @@ describe('ProdutoService', () => {
     httpTesting
       .expectOne({
         method: 'DELETE',
-        url: 'http://localhost:8080/produtos/1',
+        url: 'http://localhost:8080/tipos-produto/1',
       })
       .flush(null);
   });

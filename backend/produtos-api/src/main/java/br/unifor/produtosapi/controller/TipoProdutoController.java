@@ -25,4 +25,9 @@ public class TipoProdutoController {
     public TipoProduto salvar(@RequestBody TipoProduto tipoProduto) {
         return repository.save(tipoProduto);
     }
+
+    @DeleteMapping("/{id}")
+    public void deletar(@PathVariable Long id) {
+        repository.deleteById(id);
+    }
 }
